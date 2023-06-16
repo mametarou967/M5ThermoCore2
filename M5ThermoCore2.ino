@@ -104,9 +104,14 @@ void updateView()
   canvas.println("18");            // 表示内容をcanvasに準備
 
   // 具縦粋な値
+  RTC_TimeTypeDef t;
+  M5.Rtc.GetTime(&t);
   canvas.setFont(&fonts::lgfxJapanGothic_24);     // ゴシック体（8,12,16,20,24,28,32,36,40）
   canvas.setCursor(30,8);
-  canvas.print("時刻 12:34"); 
+  canvas.print("時刻 ");
+  canvas.printf("%2d",t.Hours);
+  canvas.print(":");
+  canvas.printf("%02d",t.Minutes); 
   canvas.setCursor(180,8);
   canvas.print("気温 ");
   canvas.printf("%2.1f",tmp); 
@@ -140,6 +145,7 @@ void updateView()
 // 初期設定 -----------------------------------------
 void setup() {
   M5.begin();   // 本体初期化
+  M5.Rtc.begin();
   // LCD初期設定
   lcd.init();                 // LCD初期化
   lcd.setRotation(1);         // 画面向き設定（0～3で設定、4～7は反転)　※CORE2、GRAYの場合
@@ -155,6 +161,10 @@ void setup() {
     Serial.println("Could not find a 0x76");
   }
 
+  RTC_TimeTypeDef t;
+  t.Hours = 7;
+  t.Minutes = 0;
+  M5.Rtc.SetTime(&t);
   updateView();
 }
 // メイン -----------------------------------------
