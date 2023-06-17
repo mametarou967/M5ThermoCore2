@@ -25,20 +25,22 @@ float tmp = 0.0;
 #define DISP_HOUR_MIN 7
 #define DISP_HOUR_MAX 19
 #define DISP_HOUR_RES 12
+#define HOURS_MAX 24
+#define INVALID_FNUM 0.0
 
-float tmpLog[24][DISP_HOUR_RES] = 
+float tmpLog[HOURS_MAX][DISP_HOUR_RES] = 
   {
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 0.0 , 1.0 , 2.0 , 3.0 , 4.0 , 5.0 , 6.0 , 7.0 , 8.0 , 9.0 , 10.0 , 11.0 } ,
-  { 12.0 , 13.0 , 14.0 , 15.0 , 16.0 , 17.0 , 18.0 , 19.0 , 20.0 , 21.0 , 22.0 , 23.0 } ,
-  { 24.0 , 25.0 , 26.0 , 27.0 , 28.0 , 29.0 , 30.0 , 31.0 , 32.0 , 33.0 , 34.0 , 35.0 } ,
-  { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
-  { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { 0.0 , 1.0 , 2.0 , 3.0 , 4.0 , 5.0 , 6.0 , 7.0 , 8.0 , 9.0 , 10.0 , 10.0 } ,
+  { 10.0 ,  10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 , 10.0 } ,
+  { 10.0 , 12.0 , 14.0 , 16.0 , 18.0 , 20.0 , 22.0 , 24.0 , 26.0 , 28.0 , 30.0 , 30.0 } ,
+  { 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 , 30.0 } ,
+  { 31.0 , 32.0 , 33.0 , 34.0 , 35.0 , 36.0 , 37.0 , 38.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
   { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
   { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
   { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
@@ -47,11 +49,11 @@ float tmpLog[24][DISP_HOUR_RES] =
   { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
   { 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 , 39.0 } ,
   { 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 , 1.0 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } ,
-  { 24.5 , 25.6 , 25.6 , 25.6 , 24.5 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 , 25.6 } 
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
+  { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
   };
 
 void updateView()
@@ -117,22 +119,41 @@ void updateView()
   canvas.printf("%2.1f",tmp); 
 
   // グラフの描画
+  Serial.println("graph start---------------");
   for(int hour = DISP_HOUR_MIN;hour <= DISP_HOUR_MAX-1;hour++)
   {
     for(int res = 0;res < DISP_HOUR_RES;res++)
     {
+      // 無効値が入っている場合は無視
+      // if(tmpLog[hour - 1][res] == INVALID_FNUM)
+      // {
+      //   continue;
+      // }
+
       int baseX = ((hour - DISP_HOUR_MIN) * 24) + 24 + (res * 2);
-      int baseY = 40 + 160 - (int)((tmpLog[hour - 1][res] * 3));
+      int baseY = 40 + 160 - (int)((tmpLog[hour - 1][res] * 4));
       int dstX =  ((hour - DISP_HOUR_MIN) * 24) + 24 + ((res + 1) * 2);
       int dstY = 0;
+      Serial.printf("hour=%d res=%d baseX=%d baseY=%d dstX=%d ",hour,res,baseX,baseY,dstX);
       if(res == DISP_HOUR_RES - 1)
       {
-        dstY =  40 + 160 - (int)((tmpLog[hour][0] * 3));
+        // if(tmpLog[hour][0] == INVALID_FNUM)
+        // {
+        //   continue;
+        // }
+        dstY =  40 + 160 - (int)((tmpLog[hour][0] * 4));
+        Serial.printf("dstY=%d tmpLog[%d][%d]=%lf tmpLog[%d][0] = %lf",dstY,hour-1,res,tmpLog[hour - 1][res],hour,tmpLog[hour]);
       }
       else
       {
-        dstY =  40 + 160 - (int)((tmpLog[hour - 1][res + 1] * 3));
+        // if(tmpLog[hour - 1][res + 1] == INVALID_FNUM)
+        // {
+        //   continue;
+        // }
+        dstY =  40 + 160 - (int)((tmpLog[hour - 1][res + 1] * 4));
+        Serial.printf("dstY=%d tmpLog[%d][%d]=%lf tmpLog[%d][%d] = %lf",dstY,hour-1,res,tmpLog[hour - 1][res],hour-1,res+1,tmpLog[hour - 1][res + 1]);
       }
+      Serial.println("");
         
       canvas.drawLine(baseX, baseY, dstX, dstY, GREEN);
     }
@@ -145,6 +166,7 @@ void updateView()
 // 初期設定 -----------------------------------------
 void setup() {
   M5.begin();   // 本体初期化
+  Serial.begin(115200);  // シリアル通信の初期化（ボーレートは115200）
   M5.Rtc.begin();
   // LCD初期設定
   lcd.init();                 // LCD初期化
@@ -161,10 +183,22 @@ void setup() {
     Serial.println("Could not find a 0x76");
   }
 
+  // ログの値の初期化
+  // for(int row = 0;row < HOURS_MAX;row++)
+  // {
+  //   for(int col = 0;col < DISP_HOUR_RES;col++)
+  //   {
+  //       tmpLog[row][col] = INVALID_FNUM;
+  //   }
+  // }
+
+  // 時計を強制的に初期化 ※将来対応
   RTC_TimeTypeDef t;
   t.Hours = 7;
   t.Minutes = 0;
   M5.Rtc.SetTime(&t);
+
+  // 初期画面表示
   updateView();
 }
 // メイン -----------------------------------------
@@ -172,7 +206,14 @@ void loop() {
   M5.update();                      // 本体ボタン状態更新
   
   if(sht30.get()==0){
+    // 現在の温度の更新
     tmp = sht30.cTemp;
+    
+    // グラフ用に記録した値を保持
+    // RTC_TimeTypeDef t;
+    // M5.Rtc.GetTime(&t);
+    // indexの導出
+    // tmpLog[t.Hours-1][t.Minutes/DISP_HOUR_RES] = tmp;
   }
 
   updateView();
