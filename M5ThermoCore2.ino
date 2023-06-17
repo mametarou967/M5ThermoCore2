@@ -56,6 +56,47 @@ float tmpLog[HOURS_MAX][DISP_HOUR_RES] =
   { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
   };
 
+void tmpLogInit()
+{
+  for(int row = 0;row < HOURS_MAX;row++)
+  {
+    for(int col = 0;col < DISP_HOUR_RES;col++)
+    {
+        tmpLog[row][col] = INVALID_FNUM;
+    }
+  }
+}
+
+bool IsOver24()
+{
+    RTC_TimeTypeDef t;
+    M5.Rtc.GetTime(&t);
+
+    if(t.Hours >= 24)
+    {
+      return true;
+    }
+
+    return false;
+}
+
+void resetTime()
+{
+  RTC_TimeTypeDef t;
+  t.Hours = 0;
+  t.Minutes = 0;
+  M5.Rtc.SetTime(&t);
+}
+
+void setTime(int hours,int minites)
+{
+  RTC_TimeTypeDef t;
+  t.Hours = hours;
+  t.Minutes = minites;
+  M5.Rtc.SetTime(&t);
+}
+
+
 void updateView()
 {
   canvas.fillScreen(BLACK);         // 背景塗り潰し
@@ -119,39 +160,39 @@ void updateView()
   canvas.printf("%2.1f",tmp); 
 
   // グラフの描画
-  Serial.println("graph start---------------");
+  // Serial.println("graph start---------------");
   for(int hour = DISP_HOUR_MIN;hour <= DISP_HOUR_MAX-1;hour++)
   {
     for(int res = 0;res < DISP_HOUR_RES;res++)
     {
       // 無効値が入っている場合は無視
-      // if(tmpLog[hour - 1][res] == INVALID_FNUM)
-      // {
-      //   continue;
-      // }
+      if(tmpLog[hour - 1][res] == INVALID_FNUM)
+      {
+         continue;
+      }
 
       int baseX = ((hour - DISP_HOUR_MIN) * 24) + 24 + (res * 2);
       int baseY = 40 + 160 - (int)((tmpLog[hour - 1][res] * 4));
       int dstX =  ((hour - DISP_HOUR_MIN) * 24) + 24 + ((res + 1) * 2);
       int dstY = 0;
-      Serial.printf("hour=%d res=%d baseX=%d baseY=%d dstX=%d ",hour,res,baseX,baseY,dstX);
+      // Serial.printf("hour=%d res=%d baseX=%d baseY=%d dstX=%d ",hour,res,baseX,baseY,dstX);
       if(res == DISP_HOUR_RES - 1)
       {
-        // if(tmpLog[hour][0] == INVALID_FNUM)
-        // {
-        //   continue;
-        // }
+        if(tmpLog[hour][0] == INVALID_FNUM)
+        {
+           continue;
+        }
         dstY =  40 + 160 - (int)((tmpLog[hour][0] * 4));
-        Serial.printf("dstY=%d tmpLog[%d][%d]=%lf tmpLog[%d][0] = %lf",dstY,hour-1,res,tmpLog[hour - 1][res],hour,tmpLog[hour]);
+        // Serial.printf("dstY=%d tmpLog[%d][%d]=%lf tmpLog[%d][0] = %lf",dstY,hour-1,res,tmpLog[hour - 1][res],hour,tmpLog[hour]);
       }
       else
       {
-        // if(tmpLog[hour - 1][res + 1] == INVALID_FNUM)
-        // {
-        //   continue;
-        // }
+        if(tmpLog[hour - 1][res + 1] == INVALID_FNUM)
+        {
+           continue;
+        }
         dstY =  40 + 160 - (int)((tmpLog[hour - 1][res + 1] * 4));
-        Serial.printf("dstY=%d tmpLog[%d][%d]=%lf tmpLog[%d][%d] = %lf",dstY,hour-1,res,tmpLog[hour - 1][res],hour-1,res+1,tmpLog[hour - 1][res + 1]);
+        // Serial.printf("dstY=%d tmpLog[%d][%d]=%lf tmpLog[%d][%d] = %lf",dstY,hour-1,res,tmpLog[hour - 1][res],hour-1,res+1,tmpLog[hour - 1][res + 1]);
       }
       Serial.println("");
         
@@ -184,19 +225,10 @@ void setup() {
   }
 
   // ログの値の初期化
-  // for(int row = 0;row < HOURS_MAX;row++)
-  // {
-  //   for(int col = 0;col < DISP_HOUR_RES;col++)
-  //   {
-  //       tmpLog[row][col] = INVALID_FNUM;
-  //   }
-  // }
+  tmpLogInit();
 
   // 時計を強制的に初期化 ※将来対応
-  RTC_TimeTypeDef t;
-  t.Hours = 7;
-  t.Minutes = 0;
-  M5.Rtc.SetTime(&t);
+  setTime(7,0);
 
   // 初期画面表示
   updateView();
@@ -210,13 +242,31 @@ void loop() {
     tmp = sht30.cTemp;
     
     // グラフ用に記録した値を保持
-    // RTC_TimeTypeDef t;
-    // M5.Rtc.GetTime(&t);
+    RTC_TimeTypeDef t;
+    M5.Rtc.GetTime(&t);
     // indexの導出
-    // tmpLog[t.Hours-1][t.Minutes/DISP_HOUR_RES] = tmp;
+    tmpLog[t.Hours-1][t.Minutes/(60/DISP_HOUR_RES)] = tmp;
+    Serial.printf("tmpLog[%d][%d]=%lf",t.Hours-1,t.Minutes/(60/DISP_HOUR_RES),tmpLog[t.Hours-1][t.Minutes/DISP_HOUR_RES]);
+    Serial.println("");
+
+    // 以下テスト用
+    t.Minutes = t.Minutes + 1;
+    if(t.Minutes >= 60)
+    {
+      t.Minutes = 0;
+      t.Hours = t.Hours + 1;
+    }
+    M5.Rtc.SetTime(&t);
   }
 
   updateView();
 
-  delay(1000); // 遅延時間（ms）
+  // 24時を過ぎたらリセット
+  if(IsOver24())
+  {
+    tmpLogInit();
+    resetTime();
+  }
+
+  delay(100); // 遅延時間（ms）
 }
