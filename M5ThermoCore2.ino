@@ -157,6 +157,13 @@ void setTime(int hours,int minites)
   M5.Rtc.SetTime(&t);
 }
 
+RTC_TimeTypeDef getTime()
+{
+  RTC_TimeTypeDef t;
+    M5.Rtc.GetTime(&t);
+    return t;
+}
+
 
 void updateView()
 {
@@ -321,13 +328,32 @@ void loop() {
     
     // グラフ用に記録した値を保持
     RTC_TimeTypeDef t;
-    M5.Rtc.GetTime(&t);
+    t = getTime();
     // indexの導出
     tmpLog[t.Hours-1][t.Minutes/(60/DISP_HOUR_RES)] = tmp;
     Serial.printf("tmpLog[%d][%d]=%lf",t.Hours-1,t.Minutes/(60/DISP_HOUR_RES),tmpLog[t.Hours-1][t.Minutes/DISP_HOUR_RES]);
     Serial.println("");
 
-    if(tmp >= 28.0)
+
+
+    // 以下テスト用
+    t.Minutes = t.Minutes + 1;
+    if(t.Minutes >= 60)
+    {
+      t.Minutes = 0;
+      t.Hours = t.Hours + 1;
+    }
+    M5.Rtc.SetTime(&t);
+  }
+
+
+  // 温度が閾値を超えた + 時間が勤務時間中 + 本日一度もしゃべっていない
+  if(tmp >= 28.0)
+  {
+    RTC_TimeTypeDef t;
+    t = getTime();
+
+    if((t.Hours) >= 8 && (t.Hours) <= 17)
     {
       if(!speakFlag)
       {
@@ -344,15 +370,6 @@ void loop() {
         M5.Axp.SetSpkEnable(false);
       }
     }
-
-    // 以下テスト用
-    t.Minutes = t.Minutes + 1;
-    if(t.Minutes >= 60)
-    {
-      t.Minutes = 0;
-      t.Hours = t.Hours + 1;
-    }
-    M5.Rtc.SetTime(&t);
   }
 
   updateView();
