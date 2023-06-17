@@ -27,6 +27,7 @@ float tmp = 0.0;
 #define DISP_HOUR_RES 12
 #define HOURS_MAX 24
 #define INVALID_FNUM 0.0
+#define TENSEN_DOT 4
 
 float tmpLog[HOURS_MAX][DISP_HOUR_RES] = 
   {
@@ -55,6 +56,18 @@ float tmpLog[HOURS_MAX][DISP_HOUR_RES] =
   { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
   { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
   };
+
+bool speakFlag = false;
+
+void setSpeakFlag()
+{
+  speakFlag = true;
+}
+
+void resetSpeakFlag()
+{
+  speakFlag = false;
+}
 
 void tmpLogInit()
 {
@@ -109,6 +122,13 @@ void updateView()
   canvas.drawFastHLine(24,  80 + 1, 292 - 2, lcd.color332(128, 128, 128));
   canvas.drawFastHLine(24, 120 + 1, 292 - 2, lcd.color332(128, 128, 128));
   canvas.drawFastHLine(24, 160 + 1, 292 - 2, lcd.color332(128, 128, 128));
+  // 28℃線
+  for(int base = 24;base <= (24 + 292 - 1);base = base + (TENSEN_DOT * 2))
+  {
+    canvas.drawFastHLine(base, 88 + 1, TENSEN_DOT, lcd.color332(240, 15, 20));
+  }
+  // canvas.drawFastHLine(24, 88 + 1, 292 - 2, lcd.color332(128, 0, 0));
+
   // 凡例:縦
   int temp_disp_baseH = (TEMP_DISP_MAX + TEMP_DISP_MIN) / 4;
   canvas.setFont(&fonts::lgfxJapanGothic_16);     // ゴシック体（8,12,16,20,24,28,32,36,40）
@@ -150,13 +170,21 @@ void updateView()
   RTC_TimeTypeDef t;
   M5.Rtc.GetTime(&t);
   canvas.setFont(&fonts::lgfxJapanGothic_24);     // ゴシック体（8,12,16,20,24,28,32,36,40）
-  canvas.setCursor(30,8);
+  canvas.setCursor(40,8);
   canvas.print("時刻 ");
   canvas.printf("%2d",t.Hours);
   canvas.print(":");
   canvas.printf("%02d",t.Minutes); 
-  canvas.setCursor(180,8);
+  canvas.setCursor(200,8);
   canvas.print("気温 ");
+  if(tmp >= 28.0)
+  {
+    canvas.setTextColor(lcd.color332(240, 15, 20));       // 文字色と背景を指定（文字色, 背景（省略可））
+  }
+  else
+  {
+    canvas.setTextColor(WHITE);
+  }
   canvas.printf("%2.1f",tmp); 
 
   // グラフの描画
@@ -268,5 +296,5 @@ void loop() {
     resetTime();
   }
 
-  delay(100); // 遅延時間（ms）
+  delay(20); // 遅延時間（ms）
 }
