@@ -1,4 +1,6 @@
+#include <driver/i2s.h>
 #include <M5Core2.h>    // CORE2使用の場合有効
+#include "wav1.h"
 // #include <M5Stack.h>       // M5Stack GRAY使用の場合有効
 // #include <M5StickCPlus.h>  // M5StickC Plus使用の場合有効
 // lovyan
@@ -29,6 +31,15 @@ float tmp = 0.0;
 #define INVALID_FNUM 0.0
 #define TENSEN_DOT 4
 
+//speaker
+#define CONFIG_I2S_BCK_PIN      12
+#define CONFIG_I2S_LRCK_PIN     0
+#define CONFIG_I2S_DATA_PIN     2
+#define CONFIG_I2S_DATA_IN_PIN  34
+#define SPEAKER_I2S_NUMBER      I2S_NUM_0
+#define MODE_MIC                0
+#define MODE_SPK                1
+
 float tmpLog[HOURS_MAX][DISP_HOUR_RES] = 
   {
   { INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM , INVALID_FNUM } ,
@@ -58,6 +69,43 @@ float tmpLog[HOURS_MAX][DISP_HOUR_RES] =
   };
 
 bool speakFlag = false;
+
+
+void InitI2SSpeakerOrMic(int mode)
+{
+  esp_err_t err = ESP_OK;
+  i2s_driver_uninstall(SPEAKER_I2S_NUMBER);
+  i2s_config_t i2s_config = {
+    .mode                 = (i2s_mode_t)(I2S_MODE_MASTER),
+    .sample_rate          = 16000,
+    .bits_per_sample      = I2S_BITS_PER_SAMPLE_16BIT,
+    .channel_format       = I2S_CHANNEL_FMT_ALL_RIGHT,
+    .communication_format = I2S_COMM_FORMAT_I2S,
+    .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,
+    .dma_buf_count        = 6,
+    .dma_buf_len          = 60,
+    .use_apll             = false,
+    .tx_desc_auto_clear   = true,
+    .fixed_mclk           = 0
+  };
+  if (mode == MODE_MIC) {
+    i2s_config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_PDM);
+  } else {
+    i2s_config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX);
+  }
+  err += i2s_driver_install(SPEAKER_I2S_NUMBER, &i2s_config, 0, NULL);
+  i2s_pin_config_t tx_pin_config = {
+    .bck_io_num           = CONFIG_I2S_BCK_PIN,
+    .ws_io_num            = CONFIG_I2S_LRCK_PIN,
+    .data_out_num         = CONFIG_I2S_DATA_PIN,
+    .data_in_num          = CONFIG_I2S_DATA_IN_PIN,
+  };
+  err += i2s_set_pin(SPEAKER_I2S_NUMBER, &tx_pin_config);
+  if (mode != MODE_MIC) {
+    err += i2s_set_clk(SPEAKER_I2S_NUMBER, 16000, I2S_BITS_PER_SAMPLE_16BIT, I2S_CHANNEL_MONO);
+  }
+  i2s_zero_dma_buffer(SPEAKER_I2S_NUMBER);
+}
 
 void setSpeakFlag()
 {
@@ -235,6 +283,8 @@ void updateView()
 // 初期設定 -----------------------------------------
 void setup() {
   M5.begin();   // 本体初期化
+  InitI2SSpeakerOrMic(MODE_MIC);
+  delay(2000);
   Serial.begin(115200);  // シリアル通信の初期化（ボーレートは115200）
   M5.Rtc.begin();
   // LCD初期設定
@@ -276,6 +326,24 @@ void loop() {
     tmpLog[t.Hours-1][t.Minutes/(60/DISP_HOUR_RES)] = tmp;
     Serial.printf("tmpLog[%d][%d]=%lf",t.Hours-1,t.Minutes/(60/DISP_HOUR_RES),tmpLog[t.Hours-1][t.Minutes/DISP_HOUR_RES]);
     Serial.println("");
+
+    if(tmp >= 28.0)
+    {
+      if(!speakFlag)
+      {
+        setSpeakFlag();
+        
+        size_t bytes_written;
+        M5.Axp.SetSpkEnable(true);
+        InitI2SSpeakerOrMic(MODE_SPK);
+        // Write Speaker
+        i2s_write(SPEAKER_I2S_NUMBER, wav1, sizeof(wav1), &bytes_written, portMAX_DELAY);
+        i2s_zero_dma_buffer(SPEAKER_I2S_NUMBER);
+        // Set Mic Mode
+        InitI2SSpeakerOrMic(MODE_MIC);
+        M5.Axp.SetSpkEnable(false);
+      }
+    }
 
     // 以下テスト用
     t.Minutes = t.Minutes + 1;
